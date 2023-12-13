@@ -1,0 +1,95 @@
+﻿<Window
+    x:Class="MyWeatherApp.View.Weather"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converter="clr-namespace:MyWeatherApp.ViewModel.ValueConverter"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:MyWeatherApp.View"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:MyWeatherApp.ViewModel"
+    Title="Weather"
+    Width="400"
+    Height="600"
+    mc:Ignorable="d">
+    <!--  creatig reference for the namespace of our view model/// xmlns:vm ="clr-namespace:MyWeatherApp.ViewModel"  -->
+
+    <Window.Resources>
+        <!--  our weather vm istance is now identified as vm  -->
+        <vm:WeatherVM x:Key="vm" />
+        <converter:BoolToRainConverter x:Key="boolToRainConverter" />
+    </Window.Resources>
+
+    <!--  we are name binding the vm to every item in the grid  -->
+    <Grid DataContext="{StaticResource vm}">
+
+        <Grid.RowDefinitions>
+            <!--  We are defining two rows. one is search that is going to take up * amount of space  -->
+            <!--  The other is auto that will take the rest  -->
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="20">
+            <!--  use grid when you want things to line up horizontally or vertically. use stack panel when there is a group of items that don't need to line p with anything else  -->
+            <!--  we are binding the text box to the query var in the vm  -->
+            <!--  because its marked as two way... if this value changes that value changes  -->
+            <!--  UpdateSourceTrigger will let the button be pressable again if you change the text box query value  -->
+            <TextBlock Text="Search for a city:" />
+            <TextBox Text="{Binding Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <Button
+                Margin="0,10"
+                Command="{Binding SearchCommand}"
+                CommandParameter="{Binding Query}"
+                Content="Search" />
+            <ListView ItemsSource="{Binding Cities}" SelectedValue="{Binding SelectedCity}">
+                <!--  We are creaing a list view to show our results  -->
+                <ListView.ItemTemplate>
+                    <!--  item template is used to specify the layout of each set in the list  -->
+                    <!--  data tempate give you  way to replace visual appaeance of item  -->
+                    <DataTemplate>
+                        <Grid>
+                            <TextBlock Text="{Binding LocalizedName}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackPanel>
+        <Grid Grid.Row="1" DataContext="{Binding CurrentCondition}">
+            <!--  targeting the second row and making the backround black  -->
+            <Grid.ColumnDefinitions>
+                <!--
+                    Auto – column will become as wide as necessary to fit its children, or
+                    * (star) take up any available remaining space
+                -->
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Margin="0,10">
+                <!--  we are passing vm again because this is a seperate grid  -->
+                <TextBlock
+                    Margin="20,0"
+                    DataContext="{StaticResource vm}"
+                    FontSize="20"
+                    Foreground="Black"
+                    Text="{Binding SelectedCity.LocalizedName}" />
+                <TextBlock
+                    Margin="20,0"
+                    FontSize="18"
+                    Foreground="black"
+                    Text="{Binding WeatherText}" />
+                <TextBlock
+                    Margin="20,0"
+                    FontSize="18"
+                    Foreground="black"
+                    Text="{Binding HasPrecipitation, Converter={StaticResource boolToRainConverter}}" />
+            </StackPanel>
+            <TextBlock
+                Grid.Column="1"
+                Margin="20,0"
+                VerticalAlignment="Center"
+                FontSize="30"
+                Foreground="black"
+                Text="{Binding Temperature.Metric.Value, StringFormat={}{0} °F}" />
+        </Grid>
+    </Grid>
+
+</Window>
